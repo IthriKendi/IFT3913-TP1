@@ -14,6 +14,7 @@ public class App
     {
         System.out.println(tloc("tp1\\src\\test\\java\\ift3931\\AppTest.java"));
         System.out.println(tassert("tp1\\src\\test\\java\\ift3931\\AppTest.java"));
+        tls("tp1\\src\\test\\java\\ift3931\\TitleTest.java");
     }
 
     public static long tloc(String stringPath) throws IOException{
@@ -45,6 +46,7 @@ public class App
         
         return numLines;
     }
+
     public static long tassert (String stringPath) throws IOException{
         long numAsserts = 0;
         String line;
@@ -65,11 +67,40 @@ public class App
             if (line.contains("assert") && read) numAsserts++;
             
         }
+
+        br.close();
+
         return numAsserts;
 
+    }
+
+    public static void tls(String stringPath) throws IOException{
+
+        BufferedReader br = new BufferedReader(new FileReader(stringPath));
+        String line;
+        String packageName = "";
+        String className = "";
+
+        while ((line = br.readLine()) != null) {
+
+            if (line.startsWith("package")){
+                packageName = line.substring(8,line.length()-1);
+            }
+
+            if (line.startsWith("public class")){
+                className = line.substring(13,line.length()-2);
+                break;
+            }
+        }
         
 
+        Long tloc    = tloc(stringPath);
+        Long tassert = tassert(stringPath);
+        float tcmp    = (float)tloc / (float)tassert;
+
+        System.out.println(packageName + ", " + className + ", " + tloc + ", " + tassert + ", " + tcmp);
         
+        br.close();
     }
 
 }
