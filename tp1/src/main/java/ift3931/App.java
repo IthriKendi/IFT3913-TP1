@@ -13,6 +13,7 @@ public class App
     public static void main( String[] args ) throws IOException
     {
         System.out.println(tloc("tp1\\src\\test\\java\\ift3931\\AppTest.java"));
+        System.out.println(tassert("tp1\\src\\test\\java\\ift3931\\AppTest.java"));
     }
 
     public static long tloc(String stringPath) throws IOException{
@@ -43,6 +44,32 @@ public class App
         br.close();
         
         return numLines;
+    }
+    public static long tassert (String stringPath) throws IOException{
+        long numAsserts = 0;
+        String line;
+        Boolean read = false;
+        
+        BufferedReader br = new BufferedReader(new FileReader(stringPath));
+
+        while ((line = br.readLine()) != null) {
+            
+            if(line.contains("{")) {
+                read = true;
+            }
+
+            else if(line.contains("}")) {
+                if (line.contains("assert") && read) numAsserts++;
+                read = false;
+            }
+            if (line.contains("assert") && read) numAsserts++;
+            
+        }
+        return numAsserts;
+
+        
+
+        
     }
 
 }
