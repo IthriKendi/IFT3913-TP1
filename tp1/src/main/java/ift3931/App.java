@@ -85,18 +85,17 @@ public class App
 
             if (line.startsWith("package")){
                 packageName = line.substring(8,line.length()-1);
-            }
-
-            if (line.startsWith("public class")){
-                className = line.substring(13,line.length()-2);
-                break;
-            }
+            }   
         }
         
+        int lastIndex = stringPath.lastIndexOf('\\');        
+        className = stringPath.substring(lastIndex + 1,stringPath.length() - 5);   
+            
+        
 
-        Long tloc    = tloc(stringPath);
-        Long tassert = tassert(stringPath);
-        float tcmp    = (float)tloc / (float)tassert;
+        long tloc    = tloc(stringPath);
+        long tassert = tassert(stringPath);
+        double tcmp    = Math.round((double)tloc / (double)tassert);
 
         System.out.println(packageName + ", " + className + ", " + tloc + ", " + tassert + ", " + tcmp);
         
