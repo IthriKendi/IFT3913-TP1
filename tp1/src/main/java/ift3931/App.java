@@ -6,6 +6,10 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.math.RoundingMode;
 import java.text.DecimalFormat;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 
 public class App 
@@ -19,7 +23,8 @@ public class App
         File folder = new File("tp1/src/test");
         
         long startTime = System.nanoTime();
-        tls(folder);
+        System.out.println(tls(folder));
+        tropcomp(folder, 2);
         long endTime = System.nanoTime();
 
         long duration = (endTime - startTime);
@@ -84,8 +89,10 @@ public class App
     }
 
     //https://stackoverflow.com/questions/1844688/how-to-read-all-files-in-a-folder-from-java
-    public static void tls(File folder) throws IOException{
+    public static ArrayList<String> tls(File folder) throws IOException{
 
+        ArrayList<String> data = new ArrayList<String>();
+        String s="";
         String line;
         String classPath = "";
         String packageName = "";
@@ -94,7 +101,8 @@ public class App
 
         for (File fileEntry : folder.listFiles()) {
             if (fileEntry.isDirectory()) {
-                tls(fileEntry);
+                data.addAll(tls(fileEntry));
+                
             } else {
                 className = fileEntry.getName();
                 className = className.substring( 0,className.length()-5);
@@ -112,22 +120,66 @@ public class App
                 long tloc    = tloc(classPath);
                 long tassert = tassert(classPath);
                 double tcmp    = ((double)tloc / (double)tassert);
-
-                df.setRoundingMode(RoundingMode.DOWN);
-                System.out.println(classPath + ", " + packageName + ", " + className + ", " + tloc + ", " + tassert + ", " + df.format(tcmp));
-
-                        br.close();
-
-            }
-        }
             
 
+                df.setRoundingMode(RoundingMode.DOWN);
+                s=classPath + ", " + packageName + ", " + className + ", " + tloc + ", " + tassert + ", " + df.format(tcmp);
+                data.add(s);
+
+                System.out.println(s);
+                br.close();
+            }
+            
+        }
+         
+        return data;
+    }
+    public static void tropcomp(File folder,int seuil) throws IOException{
+        ArrayList<String> tlsReturn = new ArrayList<String>();
         
+        tlsReturn=tls(folder);
+
+        Map<Integer, List<Double>> mp = new HashMap<>();
+        System.out.println(mp); 
+        int i =0;
+        while (i< tlsReturn.size()){
+            String parts[]=tlsReturn.get(i).split(",");
+            List<Double> data = new ArrayList<>();
+            data.add(Double.parseDouble(parts[3].replaceAll(" ", "")));
+            data.add(Double.parseDouble(parts[5].replaceAll(" ", "")));
+            mp.put(i, data);
+            i++;
+        }
+        System.out.println(mp);
+        double sumTlocs=0.00;
+        double sumTcmps=0.00;
+        for(int j=0 ;j<tlsReturn.size();j++){
+            Double tlocsVal=mp.get(j).get(0);
+            sumTlocs+=tlocsVal;
+            Double tcmpVal=mp.get(j).get(1);
+            sumTcmps+=tcmpVal;
+        }
+        double moyTloc=sumTlocs/tlsReturn.size();
+        double moyTcmp=sumTcmps/tlsReturn.size();
+        double tlocSeuil=(seuil*moyTloc)/100.0+moyTloc;
+        double tcmpSeuil=(seuil*moyTcmp)/100.0+moyTcmp;
+
+        ArrayList<Integer> indices =new ArrayList<Integer>();
+        int ind=0;
+        while(ind <mp.values().size()){
+            Double tlocsVal=mp.get(ind).get(0);
+            Double tcmpVal=mp.get(ind).get(1);
+            if (tlocsVal >tlocSeuil && (tcmpVal >tcmpSeuil)){
+                    indices.add(ind);
+                }
+            ind++;
+        }
+        for(int k=0;i<tlsReturn.size();k++){
+            if (indices.contains(k)){
+                String parts[]=tlsReturn.get(k).split(",");
+                System.out.println(parts[2]);}
+    
+        }
     }
 
-
-   
-   
-
-    
 }
