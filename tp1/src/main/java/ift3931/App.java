@@ -1,8 +1,12 @@
 package ift3931;
 
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
+import java.math.RoundingMode;
+import java.text.DecimalFormat;
+import java.util.ArrayList;
 
 /**
  * Hello world!
@@ -12,9 +16,18 @@ public class App
 {
     public static void main( String[] args ) throws IOException
     {
-        System.out.println(tloc("tp1\\src\\test\\java\\ift3931\\AppTest.java"));
+        /* System.out.println(tloc("tp1\\src\\test\\java\\ift3931\\AppTest.java"));
         System.out.println(tassert("tp1\\src\\test\\java\\ift3931\\AppTest.java"));
-        tls("tp1\\src\\test\\java\\ift3931\\TitleTest.java");
+        tls("tp1\\src\\test\\java\\ift3931\\TitleTest.java"); */
+
+        File folder = new File("tp1/src/test");
+        
+        long startTime = System.nanoTime();
+        tls(folder);
+        long endTime = System.nanoTime();
+
+        long duration = (endTime - startTime);
+        System.out.println(duration/1000000);
     }
 
     public static long tloc(String stringPath) throws IOException{
@@ -74,32 +87,51 @@ public class App
 
     }
 
-    public static void tls(String stringPath) throws IOException{
+    //https://stackoverflow.com/questions/1844688/how-to-read-all-files-in-a-folder-from-java
+    public static void tls(File folder) throws IOException{
 
-        BufferedReader br = new BufferedReader(new FileReader(stringPath));
         String line;
+        String classPath = "";
         String packageName = "";
         String className = "";
+        DecimalFormat df = new DecimalFormat("0.00");
 
-        while ((line = br.readLine()) != null) {
+        for (File fileEntry : folder.listFiles()) {
+            if (fileEntry.isDirectory()) {
+                tls(fileEntry);
+            } else {
+                className = fileEntry.getName();
+                className = className.substring( 0,className.length()-5);
+                classPath = fileEntry.getPath();
+                BufferedReader br = new BufferedReader(new FileReader(fileEntry));
 
-            if (line.startsWith("package")){
-                packageName = line.substring(8,line.length()-1);
-            }   
+                while ((line = br.readLine()) != null) {
+
+                    if (line.startsWith("package")){
+                        packageName = line.substring(8,line.length()-1);
+                        break;
+                    }   
+                }
+
+                long tloc    = tloc(classPath);
+                long tassert = tassert(classPath);
+                double tcmp    = ((double)tloc / (double)tassert);
+
+                df.setRoundingMode(RoundingMode.DOWN);
+                System.out.println(classPath + ", " + packageName + ", " + className + ", " + tloc + ", " + tassert + ", " + df.format(tcmp));
+
+                        br.close();
+
+            }
         }
-        
-        int lastIndex = stringPath.lastIndexOf('\\');        
-        className = stringPath.substring(lastIndex + 1,stringPath.length() - 5);   
             
-        
 
-        long tloc    = tloc(stringPath);
-        long tassert = tassert(stringPath);
-        double tcmp    = Math.round((double)tloc / (double)tassert);
-
-        System.out.println(packageName + ", " + className + ", " + tloc + ", " + tassert + ", " + tcmp);
         
-        br.close();
     }
 
+
+   
+   
+
+    
 }
