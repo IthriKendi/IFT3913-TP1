@@ -6,12 +6,8 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.math.RoundingMode;
 import java.text.DecimalFormat;
-import java.util.ArrayList;
 
-/**
- * Hello world!
- *
- */
+
 public class App 
 {
     public static void main( String[] args ) throws IOException
