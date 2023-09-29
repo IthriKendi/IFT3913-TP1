@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.math.RoundingMode;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -89,10 +90,10 @@ public class App
     }
 
     //https://stackoverflow.com/questions/1844688/how-to-read-all-files-in-a-folder-from-java
+
     public static ArrayList<String> tls(File folder) throws IOException{
 
         ArrayList<String> data = new ArrayList<String>();
-        String s="";
         String line;
         String classPath = "";
         String packageName = "";
@@ -102,8 +103,9 @@ public class App
         for (File fileEntry : folder.listFiles()) {
             if (fileEntry.isDirectory()) {
                 data.addAll(tls(fileEntry));
+            } 
+            else if (fileEntry.getName().contains("Test") || fileEntry.getName().contains("test")){
                 
-            } else {
                 className = fileEntry.getName();
                 className = className.substring( 0,className.length()-5);
                 classPath = fileEntry.getPath();
@@ -116,23 +118,28 @@ public class App
                         break;
                     }   
                 }
-
+                double tcmp;
                 long tloc    = tloc(classPath);
                 long tassert = tassert(classPath);
-                double tcmp    = ((double)tloc / (double)tassert);
-            
+                if (tassert!=0){
+                     tcmp   = ((double)tloc / (double)tassert);
+                
 
                 df.setRoundingMode(RoundingMode.DOWN);
-                s=classPath + ", " + packageName + ", " + className + ", " + tloc + ", " + tassert + ", " + df.format(tcmp);
+                String s = classPath + ", " + packageName + ", " + className + ", " + tloc + ", " + tassert + ", " + df.format(tcmp);
+
                 data.add(s);
 
-                System.out.println(s);
-                br.close();
+                br.close();}
+                else{
+                    continue;
+                }
+
             }
-            
         }
-         
+            
         return data;
+        
     }
     public static void tropcomp(File folder,int seuil) throws IOException{
         ArrayList<String> tlsReturn = new ArrayList<String>();
@@ -150,35 +157,45 @@ public class App
             mp.put(i, data);
             i++;
         }
+
         System.out.println(mp);
-        double sumTlocs=0.00;
-        double sumTcmps=0.00;
+        ArrayList<Double> numTlocs=new ArrayList<Double>();
+        ArrayList<Double> numTcmps=new ArrayList<Double>();
+        
         for(int j=0 ;j<tlsReturn.size();j++){
             Double tlocsVal=mp.get(j).get(0);
-            sumTlocs+=tlocsVal;
+            numTlocs.add(tlocsVal);
             Double tcmpVal=mp.get(j).get(1);
-            sumTcmps+=tcmpVal;
+            numTcmps.add(tcmpVal);
         }
-        double moyTloc=sumTlocs/tlsReturn.size();
-        double moyTcmp=sumTcmps/tlsReturn.size();
-        double tlocSeuil=(seuil*moyTloc)/100.0+moyTloc;
-        double tcmpSeuil=(seuil*moyTcmp)/100.0+moyTcmp;
+        ArrayList<Double> sortTlocs = new ArrayList<>(numTlocs);
+        ArrayList<Double> sortTcmps = new ArrayList<>(numTcmps);
+        Collections.sort(sortTlocs);
+        Collections.sort(sortTcmps);
+        int seuilInd=numTlocs.size()-(seuil*numTlocs.size())/100;
+        System.out.println("**********************************");
+   
 
         ArrayList<Integer> indices =new ArrayList<Integer>();
         int ind=0;
+        double s1=sortTlocs.get(seuilInd);
+        double s2=sortTcmps.get(seuilInd);
         while(ind <mp.values().size()){
             Double tlocsVal=mp.get(ind).get(0);
+            //System.out.println("tloc : "+ ind +" : "+tlocsVal+ " " + sortTlocs.get(seuilInd));
             Double tcmpVal=mp.get(ind).get(1);
-            if (tlocsVal >tlocSeuil && (tcmpVal >tcmpSeuil)){
+            //System.out.println("tcmp : "+ind +" : "+tcmpVal+ " " + sortTcmps.get(seuilInd));
+            if ((tlocsVal >=s1) && (tcmpVal >=s2)){
                     indices.add(ind);
                 }
             ind++;
         }
-        for(int k=0;i<tlsReturn.size();k++){
-            if (indices.contains(k)){
-                String parts[]=tlsReturn.get(k).split(",");
+        System.out.println(indices);
+        for(int l=0;l<tlsReturn.size();l++){
+            if (indices.contains(l)){
+                String parts[]=tlsReturn.get(l).split(",");
                 System.out.println(parts[2]);}
-    
+        
         }
     }
 
