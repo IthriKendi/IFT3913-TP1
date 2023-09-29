@@ -1,4 +1,4 @@
-package ift3931;
+package ift3913;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -25,11 +25,13 @@ public class App
         
         long startTime = System.nanoTime();
         System.out.println(tls(folder));
-        tropcomp(folder, 2);
+        tropcomp(folder, 10);
         long endTime = System.nanoTime();
 
         long duration = (endTime - startTime);
         System.out.println(duration/1000000);
+
+        
     }
 
     public static long tloc(String stringPath) throws IOException{
@@ -90,7 +92,6 @@ public class App
     }
 
     //https://stackoverflow.com/questions/1844688/how-to-read-all-files-in-a-folder-from-java
-
     public static ArrayList<String> tls(File folder) throws IOException{
 
         ArrayList<String> data = new ArrayList<String>();
@@ -118,19 +119,24 @@ public class App
                         break;
                     }   
                 }
+
                 double tcmp;
                 long tloc    = tloc(classPath);
                 long tassert = tassert(classPath);
+
                 if (tassert!=0){
-                     tcmp   = ((double)tloc / (double)tassert);
+
+                    tcmp   = ((double)tloc / (double)tassert);
                 
 
-                df.setRoundingMode(RoundingMode.DOWN);
-                String s = classPath + ", " + packageName + ", " + className + ", " + tloc + ", " + tassert + ", " + df.format(tcmp);
+                    df.setRoundingMode(RoundingMode.DOWN);
+                    String s = classPath + ", " + packageName + ", " + className + ", " + tloc + ", " + tassert + ", " + df.format(tcmp);
 
-                data.add(s);
+                    data.add(s);
 
-                br.close();}
+                    br.close();
+
+                }
                 else{
                     continue;
                 }
@@ -141,16 +147,19 @@ public class App
         return data;
         
     }
-    public static void tropcomp(File folder,int seuil) throws IOException{
+
+    public static void tropcomp(File folder,double seuil) throws IOException{
+        
         ArrayList<String> tlsReturn = new ArrayList<String>();
         
-        tlsReturn=tls(folder);
+        tlsReturn = tls(folder);
 
         Map<Integer, List<Double>> mp = new HashMap<>();
         System.out.println(mp); 
-        int i =0;
-        while (i< tlsReturn.size()){
-            String parts[]=tlsReturn.get(i).split(",");
+        int i = 0;
+
+        while (i < tlsReturn.size()){
+            String parts[] = tlsReturn.get(i).split(",");
             List<Double> data = new ArrayList<>();
             data.add(Double.parseDouble(parts[3].replaceAll(" ", "")));
             data.add(Double.parseDouble(parts[5].replaceAll(" ", "")));
@@ -159,44 +168,54 @@ public class App
         }
 
         System.out.println(mp);
-        ArrayList<Double> numTlocs=new ArrayList<Double>();
-        ArrayList<Double> numTcmps=new ArrayList<Double>();
+        ArrayList<Double> numTlocs = new ArrayList<Double>();
+        ArrayList<Double> numTcmps = new ArrayList<Double>();
         
-        for(int j=0 ;j<tlsReturn.size();j++){
+        for(int j = 0 ; j < tlsReturn.size(); j++){
+
             Double tlocsVal=mp.get(j).get(0);
             numTlocs.add(tlocsVal);
+
             Double tcmpVal=mp.get(j).get(1);
             numTcmps.add(tcmpVal);
         }
+
         ArrayList<Double> sortTlocs = new ArrayList<>(numTlocs);
         ArrayList<Double> sortTcmps = new ArrayList<>(numTcmps);
         Collections.sort(sortTlocs);
         Collections.sort(sortTcmps);
-        int seuilInd=numTlocs.size()-(seuil*numTlocs.size())/100;
+
+
+        double sl = (seuil * numTcmps.size()) / 100;
+        int seuilInd = numTlocs.size() - (int) Math.ceil(sl);
         System.out.println("**********************************");
    
 
-        ArrayList<Integer> indices =new ArrayList<Integer>();
-        int ind=0;
-        double s1=sortTlocs.get(seuilInd);
-        double s2=sortTcmps.get(seuilInd);
-        while(ind <mp.values().size()){
-            Double tlocsVal=mp.get(ind).get(0);
-            //System.out.println("tloc : "+ ind +" : "+tlocsVal+ " " + sortTlocs.get(seuilInd));
-            Double tcmpVal=mp.get(ind).get(1);
-            //System.out.println("tcmp : "+ind +" : "+tcmpVal+ " " + sortTcmps.get(seuilInd));
-            if ((tlocsVal >=s1) && (tcmpVal >=s2)){
-                    indices.add(ind);
-                }
+        ArrayList<Integer> indices = new ArrayList<Integer>();
+        int ind = 0;
+        double s1 = sortTlocs.get(seuilInd);
+        double s2 = sortTcmps.get(seuilInd);
+        while(ind < mp.values().size()){
+            Double tlocsVal = mp.get(ind).get(0);
+            
+            Double tcmpVal = mp.get(ind).get(1);
+            
+            if ((tlocsVal >= s1) && (tcmpVal >= s2)){
+                indices.add(ind);
+            }
+
             ind++;
         }
-        System.out.println(indices);
-        for(int l=0;l<tlsReturn.size();l++){
+
+        
+        for(int l = 0; l < tlsReturn.size(); l++){
             if (indices.contains(l)){
-                String parts[]=tlsReturn.get(l).split(",");
+                String parts[] = tlsReturn.get(l).split(",");
                 System.out.println(parts[2]);}
         
         }
     }
+
+    
 
 }
