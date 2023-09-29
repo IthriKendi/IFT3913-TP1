@@ -13,11 +13,14 @@ public class tls {
     
     public static void main(String[] args) throws IOException {
 
+        // regular call 
         if (args.length == 1){
             String path = args[0];
             File folder = new File(path);
             System.out.println(tls(folder));
         }
+
+        // option call 
         else if (args.length > 1 && args[0].equals("-o")){
 
             File output = new File(args[1]);
@@ -28,14 +31,19 @@ public class tls {
         else{
             System.out.println("Invalid arguments");
             System.out.println("Please enter : tls <input file path> OR tls -o <output file path> <input file path>");
-        }
-
-        /* File folder = new File("C:\\Users\\ithri\\Desktop\\IFT3913_TP1\\tp1\\src\\test");
-        System.out.println(tls(folder)); */
-        
+        }        
         
     }
-    //https://stackoverflow.com/questions/1844688/how-to-read-all-files-in-a-folder-from-java
+
+    
+    //Inspired from : https://stackoverflow.com/questions/1844688/how-to-read-all-files-in-a-folder-from-java
+
+    /**
+     * This method takes in argument a folder and goes through that folder in a recursive to find all the test files within that folder and returns the information of the test file in a csv format
+     * @param folder
+     * @return an arraylist containing the lines of path, package name, class name, tloc, tassert, tcmp
+     * @throws IOException
+     */
     public static ArrayList<String> tls(File folder) throws IOException{
 
         ArrayList<String> data = new ArrayList<String>();
@@ -45,7 +53,10 @@ public class tls {
         String className = "";
         DecimalFormat df = new DecimalFormat("0.00");
 
+
         for (File fileEntry : folder.listFiles()) {
+
+            // if directory dive recursively 
             if (fileEntry.isDirectory()) {
                 data.addAll(tls(fileEntry));
             } 
@@ -68,6 +79,7 @@ public class tls {
                 long tsrt = tassert.tassert(classPath);
                 double tcmp    = ((double)tlc / (double)tsrt);
 
+                // if tassert = 0, we do not cosider this file since it does not have any assertion
                 if (tsrt!=0){
 
                     tcmp   = ((double)tlc / (double)tsrt);
@@ -92,6 +104,12 @@ public class tls {
         
     }
 
+    /**
+     * This method takes in argument an input and an output path and writes a csv of all the tsl lines in the output path
+     * @param in
+     * @param out
+     * @throws IOException
+     */
     public static void writeCSV(File in, File out) throws IOException{
         FileWriter writer = new FileWriter(out);
         

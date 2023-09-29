@@ -12,7 +12,15 @@ public class tassert {
         }
         System.out.println(tassert(args[0]));
     }
+
+    /**
+     * This method takes in argument a path to a java file and returns the number of assertions within the file
+     * @param stringPath
+     * @return number of assertions
+     * @throws IOException
+     */
     public static long tassert (String stringPath) throws IOException{
+
         long numAsserts = 0;
         String line;
         Boolean read = false;
@@ -21,6 +29,8 @@ public class tassert {
 
         while ((line = br.readLine()) != null) {
             
+
+            // making sur we are between brackets to read the assertions
             if(line.contains("{")) {
                 read = true;
             }

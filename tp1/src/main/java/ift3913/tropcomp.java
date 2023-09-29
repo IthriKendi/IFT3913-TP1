@@ -107,6 +107,12 @@ public class tropcomp {
 
     }
 
+    /**
+     * This method takes in argument an input and an output path and seuil and writes a csv of all the tropcomp lines in the output path
+     * @param in
+     * @param out
+     * @throws IOException
+     */
     public static void writeCSV(File in, double seuil, File out) throws IOException{
         FileWriter writer = new FileWriter(out);
         
