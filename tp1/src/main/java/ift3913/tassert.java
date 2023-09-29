@@ -29,18 +29,22 @@ public class tassert {
 
         while ((line = br.readLine()) != null) {
             
-
-            // making sur we are between brackets to read the assertions
-            if(line.contains("{")) {
-                read = true;
+            // skip single line comments, imports, blank and empty line
+            if (line.contains("//") || line.startsWith("import") || line.isBlank() || line.isEmpty()){
+                continue;
             }
-
-            else if(line.contains("}")) {
-                if (line.contains("assert") && read) numAsserts++;
+            
+            // Skip multiple line comments
+            if(line.contains("/*")) {
                 read = false;
             }
-            if (line.contains("assert") && read) numAsserts++;
             
+            if(line.contains("*/")) {
+                read = true;
+                continue;
+            }
+
+             if ((line.contains("assert") || line.contains("fail")) && read) numAsserts++;
         }
 
         br.close();
