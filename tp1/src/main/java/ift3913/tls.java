@@ -17,7 +17,7 @@ public class tls {
         if (args.length == 1){
             String path = args[0];
             File folder = new File(path);
-            System.out.println(tls(folder));
+            tls(folder);
         }
 
         // option call 
@@ -87,6 +87,8 @@ public class tls {
 
                     df.setRoundingMode(RoundingMode.DOWN);
                     String s = classPath + ", " + packageName + ", " + className + ", " + tlc + ", " + tsrt + ", " + df.format(tcmp);
+
+                    System.out.println(s);
 
                     data.add(s);
 
