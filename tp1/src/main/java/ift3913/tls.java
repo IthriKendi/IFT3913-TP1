@@ -75,8 +75,8 @@ public class tls {
                     }   
                 }
 
-                long tlc    = tloc.tloc(classPath);
-                long tsrt = tassert.tassert(classPath);
+                long tlc    = tloc(classPath);
+                long tsrt = tassert(classPath);
                 double tcmp    = ((double)tlc / (double)tsrt);
 
                 // if tassert = 0, we do not cosider this file since it does not have any assertion
@@ -120,5 +120,87 @@ public class tls {
         }
 
         writer.close();
+    }
+
+    /**
+     * This methods takes in argument a path to a java file and returns the number of non-blank and non-comments lines
+     * @param stringPath
+     * @return number of lines
+     * @throws IOException
+     */
+    public static long tloc(String stringPath) throws IOException{
+
+        long numLines = 0;
+        String line;
+        Boolean read = true;
+
+        BufferedReader br = new BufferedReader(new FileReader(stringPath));
+
+        while ((line = br.readLine()) != null) {
+
+            // Skip the signle line comments and the blank or empty lines
+            if (line.contains("//") || line.isBlank() || line.isEmpty()){
+                continue;
+            }
+            
+            // Start of a multiple lines comment
+            else if(line.contains("/*")) {
+                read = false;
+            }
+
+            // End of a multiple lines comment
+            else if(line.contains("*/")) {
+                read = true;
+                continue;
+            }
+
+            if (!read) continue; 
+
+            numLines++;
+        };
+
+        br.close();
+        
+        return numLines;
+    }
+
+    /**
+     * This method takes in argument a path to a java file and returns the number of assertions within the file
+     * @param stringPath
+     * @return number of assertions
+     * @throws IOException
+     */
+    public static long tassert (String stringPath) throws IOException{
+
+        long numAsserts = 0;
+        String line;
+        Boolean read = false;
+        
+        BufferedReader br = new BufferedReader(new FileReader(stringPath));
+
+        while ((line = br.readLine()) != null) {
+            
+            // skip single line comments, imports, blank and empty line
+            if (line.contains("//") || line.startsWith("import") || line.isBlank() || line.isEmpty()){
+                continue;
+            }
+            
+            // Skip multiple line comments
+            if(line.contains("/*")) {
+                read = false;
+            }
+            
+            if(line.contains("*/")) {
+                read = true;
+                continue;
+            }
+
+             if ((line.contains("assert") || line.contains("fail")) && read) numAsserts++;
+        }
+
+        br.close();
+
+        return numAsserts;
+
     }
 }
